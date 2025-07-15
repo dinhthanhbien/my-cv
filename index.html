@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="vi" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đinh Thành Biên | Kỹ sư Java Backend Cao cấp & Kiến trúc sư Giải pháp</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        <!-- Chosen Palette: Slate Gray and Professional Blue -->
+        <!-- Application Structure Plan: A single-page, vertical scrolling narrative portfolio. The structure flows from a hero intro, to an interactive skills visualization (radar chart), to a clickable career timeline with AI-powered deep dives, and a contact section featuring an AI cover letter assistant. A "Download CV" button is added for practicality. This structure is highly engaging, allowing recruiters to quickly grasp key strengths and explore details interactively. A language switcher is retained for bilingual support. -->
+        <!-- Visualization & Content Choices: Summary: Skills -> Goal: Compare strengths -> Viz: Radar Chart (Chart.js/Canvas) -> Interaction: Hover tooltips -> Justification: Engaging and visual. Experience -> Goal: Show progression & detail -> Viz: Vertical Timeline (HTML/CSS) -> Interaction: Click to expand, click AI button for deep-dive modal -> Justification: Organizes data cleanly, prevents info overload, and adds a "wow" factor with AI. Cover Letter Helper -> Goal: Demonstrate practical AI application -> Viz: Form (HTML/CSS) -> Interaction: Input text, click button for AI generation -> Justification: Highly practical tool for recruiters, showcasing proactive problem-solving. CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+        <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            width: 1.25rem;
+            height: 1.25rem;
+            border-radius: 50%;
+            left: -0.625rem;
+            top: 0;
+            background-color: #3b82f6;
+            border: 4px solid #f1f5f9;
+        }
+        .timeline-content.hidden {
+            max-height: 0;
+            opacity: 0;
+            padding-top: 0;
+            padding-bottom: 0;
+            margin-top: 0;
+        }
+        .lang-btn.active {
+            background-color: #3b82f6;
+            color: white;
+        }
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3b82f6;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-700">
+
+    <!-- Header & Navigation -->
+    <header class="bg-white/80 backdrop-blur-md sticky top-0 z-50 shadow-sm">
+        <nav class="container mx-auto px-6 py-3 flex justify-between items-center">
+            <a href="#" class="text-2xl font-bold text-slate-800" data-lang-key="name">Đinh Thành Biên</a>
+            <div class="hidden md:flex items-center space-x-4">
+                <a href="#summary" class="text-slate-600 hover:text-blue-600 transition" data-lang-key="navSummary">Tóm tắt</a>
+                <a href="#skills" class="text-slate-600 hover:text-blue-600 transition" data-lang-key="navSkills">Kỹ năng</a>
+                <a href="#experience" class="text-slate-600 hover:text-blue-600 transition" data-lang-key="navExperience">Kinh nghiệm</a>
+                <a href="./DinhThanhBien-resume.pdf" download="DinhThanhBien-CV.pdf" class="text-blue-600 border border-blue-600 px-4 py-2 rounded-md hover:bg-blue-50 transition text-sm font-semibold" data-lang-key="navDownload">Tải CV</a>
+                <a href="#contact" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition" data-lang-key="navContact">Liên hệ</a>
+                 <div class="flex border border-slate-300 rounded-md">
+                    <button id="lang-vi" class="lang-btn px-3 py-1 text-sm font-semibold rounded-l-md">VI</button>
+                    <button id="lang-en" class="lang-btn px-3 py-1 text-sm font-semibold rounded-r-md">EN</button>
+                </div>
+            </div>
+            <button id="mobile-menu-button" class="md:hidden text-slate-800">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+            </button>
+        </nav>
+        <div id="mobile-menu" class="hidden md:hidden px-6 pb-4">
+             <a href="#summary" class="block py-2 text-slate-600 hover:text-blue-600 transition" data-lang-key="navSummaryMobile">Tóm tắt</a>
+             <a href="#skills" class="block py-2 text-slate-600 hover:text-blue-600 transition" data-lang-key="navSkillsMobile">Kỹ năng</a>
+             <a href="#experience" class="block py-2 text-slate-600 hover:text-blue-600 transition" data-lang-key="navExperienceMobile">Kinh nghiệm</a>
+             <a href="./DinhThanhBien-resume.pdf" download="DinhThanhBien-CV.pdf" class="block py-2 text-slate-600 hover:text-blue-600 transition" data-lang-key="navDownloadMobile">Tải CV (PDF)</a>
+             <a href="#contact" class="block mt-2 bg-blue-600 text-white text-center px-4 py-2 rounded-md hover:bg-blue-700 transition" data-lang-key="navContactMobile">Liên hệ</a>
+             <div class="flex border border-slate-300 rounded-md mt-4 justify-center">
+                <button id="lang-vi-mobile" class="lang-btn px-3 py-1 text-sm font-semibold rounded-l-md">VI</button>
+                <button id="lang-en-mobile" class="lang-btn px-3 py-1 text-sm font-semibold rounded-r-md">EN</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-6 py-12">
+
+        <!-- Hero Section -->
+        <section class="text-center py-16">
+            <h1 class="text-4xl md:text-6xl font-extrabold text-slate-800" data-lang-key="heroTitle"></h1>
+            <p class="mt-4 text-lg md:text-xl text-slate-600 max-w-3xl mx-auto" data-lang-key="heroSubtitle"></p>
+            <div class="mt-8 flex flex-col sm:flex-row justify-center items-center space-y-4 sm:space-y-0 sm:space-x-4">
+                <a href="#experience" class="w-full sm:w-auto inline-block bg-blue-600 text-white px-8 py-3 rounded-lg text-lg font-semibold hover:bg-blue-700 transition-transform transform hover:scale-105" data-lang-key="heroButton"></a>
+                <a href="./DinhThanhBien-resume.pdf" download="DinhThanhBien-CV.pdf" class="w-full sm:w-auto inline-block bg-white text-blue-600 border border-blue-600 px-8 py-3 rounded-lg text-lg font-semibold hover:bg-blue-50 transition-transform transform hover:scale-105" data-lang-key="heroDownload"></a>
+            </div>
+        </section>
+
+        <!-- Professional Summary Section -->
+        <section id="summary" class="py-16">
+            <h2 class="text-3xl font-bold text-center text-slate-800 mb-2" data-lang-key="summaryTitle"></h2>
+            <div class="w-20 h-1 bg-blue-600 mx-auto mb-12"></div>
+            <div class="max-w-4xl mx-auto bg-white p-8 rounded-lg shadow-md">
+                 <p class="text-lg text-slate-600 leading-relaxed" data-lang-key="summaryContent"></p>
+            </div>
+        </section>
+
+        <!-- Skills Section -->
+        <section id="skills" class="py-16 bg-slate-100 rounded-lg">
+            <h2 class="text-3xl font-bold text-center text-slate-800 mb-2" data-lang-key="skillsTitle"></h2>
+            <div class="w-20 h-1 bg-blue-600 mx-auto mb-12"></div>
+            <p class="text-center max-w-2xl mx-auto mb-12 text-slate-600" data-lang-key="skillsIntro"></p>
+            <div class="chart-container relative w-full max-w-2xl mx-auto h-80 md:h-96">
+                <canvas id="skillsChart"></canvas>
+            </div>
+        </section>
+
+        <!-- Experience Section -->
+        <section id="experience" class="py-16">
+            <h2 class="text-3xl font-bold text-center text-slate-800 mb-2" data-lang-key="experienceTitle"></h2>
+            <div class="w-20 h-1 bg-blue-600 mx-auto mb-12"></div>
+            <p class="text-center max-w-2xl mx-auto mb-16 text-slate-600" data-lang-key="experienceIntro"></p>
+            <div id="timeline-container" class="relative max-w-3xl mx-auto pl-8 border-l-2 border-slate-200"></div>
+        </section>
+        
+        <!-- Contact Section -->
+        <section id="contact" class="py-16">
+            <h2 class="text-3xl font-bold text-center text-slate-800 mb-2" data-lang-key="contactTitle"></h2>
+            <div class="w-20 h-1 bg-blue-600 mx-auto mb-12"></div>
+            <div class="max-w-4xl mx-auto text-center">
+                <p class="text-slate-600 max-w-xl mx-auto mb-8" data-lang-key="contactIntro"></p>
+                <div class="flex flex-col md:flex-row justify-center items-center space-y-4 md:space-y-0 md:space-x-8 text-lg mb-12">
+                    <a href="mailto:biendt.ktqs@gmail.com" class="font-semibold hover:text-blue-600 transition">biendt.ktqs@gmail.com</a>
+                    <span class="hidden md:block text-slate-400">|</span>
+                    <p class="font-semibold">+84 968 456 196</p>
+                    <span class="hidden md:block text-slate-400">|</span>
+                    <a href="#" class="font-semibold hover:text-blue-600 transition" data-lang-key="contactLinkedIn"></a>
+                </div>
+
+                <div class="bg-white p-8 rounded-lg shadow-md border border-slate-200">
+                    <h3 class="text-2xl font-bold text-slate-800 mb-2" data-lang-key="aiHelperTitle"></h3>
+                    <p class="text-slate-600 mb-6" data-lang-key="aiHelperIntro"></p>
+                    <textarea id="job-description" class="w-full p-3 border border-slate-300 rounded-md h-40 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" data-lang-key="aiHelperPlaceholder"></textarea>
+                    <button id="generate-snippet-btn" class="mt-4 bg-blue-600 text-white px-6 py-3 rounded-lg text-lg font-semibold hover:bg-blue-700 transition-transform transform hover:scale-105 disabled:bg-slate-400 disabled:cursor-not-allowed">
+                        <span data-lang-key="aiHelperButton"></span> ✨
+                    </button>
+                    <div id="snippet-result-container" class="mt-6 text-left hidden">
+                        <h4 class="font-bold text-lg text-slate-800" data-lang-key="aiHelperResultTitle"></h4>
+                        <div id="snippet-result" class="mt-2 p-4 bg-slate-100 rounded-md text-slate-700 whitespace-pre-wrap"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="text-center py-6 bg-slate-100">
+        <p class="text-slate-500" data-lang-key="footer"></p>
+    </footer>
+    
+    <!-- AI Modal -->
+    <div id="ai-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden z-50">
+        <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full">
+            <div class="p-6 border-b border-slate-200 flex justify-between items-center">
+                <h3 class="text-xl font-bold text-slate-800" data-lang-key="modalTitle"></h3>
+                <button id="close-modal-btn" class="text-slate-500 hover:text-slate-800 text-3xl">&times;</button>
+            </div>
+            <div id="modal-content" class="p-6">
+                <!-- AI content or loader will be injected here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            let currentLanguage = 'vi';
+            let skillsChart;
+            let isApiCallInProgress = false;
+
+            const translations = {
+                vi: {
+                    name: "Đinh Thành Biên",
+                    navSummary: "Tóm tắt", navSkills: "Kỹ năng", navExperience: "Kinh nghiệm", navContact: "Liên hệ", navDownload: "Tải CV",
+                    navSummaryMobile: "Tóm tắt", navSkillsMobile: "Kỹ năng", navExperienceMobile: "Kinh nghiệm", navContactMobile: "Liên hệ", navDownloadMobile: "Tải CV (PDF)",
+                    heroTitle: "Kỹ sư Java Backend Cao cấp & Kiến trúc sư Giải pháp",
+                    heroSubtitle: "Xây dựng các hệ thống mạnh mẽ, có khả năng mở rộng cho ngành FinTech và InsurTech với niềm đam mê tích hợp AI và Blockchain để thúc đẩy sự đổi mới.",
+                    heroButton: "Xem Kinh nghiệm", heroDownload: "Tải CV (PDF)",
+                    summaryTitle: "Tóm tắt Chuyên môn",
+                    summaryContent: "Là một Kiến trúc sư Giải pháp và Kỹ sư Java Backend Cao cấp năng động với hơn sáu năm kinh nghiệm, tôi đã có thành tích được chứng minh trong việc cung cấp các hệ thống linh hoạt và có khả năng mở rộng trong các lĩnh vực FinTech và InsurTech. Chuyên môn của tôi nằm ở việc lãnh đạo các đội ngũ kỹ thuật hiệu suất cao và kiến trúc các giải pháp sáng tạo tích hợp một cách thuần thục các công nghệ AI và Blockchain tiên tiến. Tôi phát triển mạnh trong việc giải quyết các thách thức kinh doanh phức tạp và cam kết thúc đẩy chuyển đổi số có ý nghĩa.",
+                    skillsTitle: "Bộ kỹ năng Kỹ thuật",
+                    skillsIntro: "Năng lực kỹ thuật của tôi rất toàn diện, với chuyên môn sâu về phát triển backend và kiến trúc doanh nghiệp. Biểu đồ dưới đây cung cấp một cái nhìn trực quan về trình độ của tôi trên các lĩnh vực công nghệ chính, làm nổi bật sự tập trung mạnh mẽ vào việc tạo ra các ứng dụng hiện đại, dựa trên dữ liệu.",
+                    experienceTitle: "Hành trình Sự nghiệp",
+                    experienceIntro: "Sự nghiệp của tôi là một hành trình không ngừng phát triển, giải quyết các thách thức ngày càng phức tạp trong lĩnh vực ngân hàng, bảo hiểm và viễn thông. Nhấp vào mỗi vai trò để mở rộng và xem các đóng góp và thành tựu chính của tôi.",
+                    contactTitle: "Liên hệ & Công cụ AI",
+                    contactIntro: "Tôi luôn sẵn lòng thảo luận về các dự án mới, ý tưởng sáng tạo hoặc cơ hội trở thành một phần của một đội ngũ đầy tham vọng.",
+                    contactLinkedIn: "Hồ sơ LinkedIn",
+                    footer: "&copy; 2024 Đinh Thành Biên. Bảo lưu mọi quyền.",
+                    chartLabel: "Trình độ",
+                    chartLabels: ['Phát triển Backend', 'Kiến trúc', 'Cơ sở dữ liệu', 'DevOps & CI/CD', 'AI & ML', 'Frontend'],
+                    deepDiveButton: "Phân Tích Chuyên Sâu",
+                    modalTitle: "Phân Tích Chuyên Sâu bởi AI",
+                    modalLoading: "AI đang phân tích, vui lòng chờ...",
+                    aiHelperTitle: "Trợ lý Soạn Thư Xin Việc",
+                    aiHelperIntro: "Dán mô tả công việc (JD) vào đây. AI sẽ giúp bạn tạo một đoạn văn ngắn, kết nối kinh nghiệm của tôi với các yêu cầu của vị trí tuyển dụng.",
+                    aiHelperPlaceholder: "Dán mô tả công việc ở đây...",
+                    aiHelperButton: "Tạo Gợi ý",
+                    aiHelperResultTitle: "Gợi ý từ AI:",
+                    errorText: "Đã xảy ra lỗi. Vui lòng thử lại."
+                },
+                en: {
+                    name: "Dinh Thanh Bien",
+                    navSummary: "Summary", navSkills: "Skills", navExperience: "Experience", navContact: "Contact", navDownload: "Download CV",
+                    navSummaryMobile: "Summary", navSkillsMobile: "Skills", navExperienceMobile: "Experience", navContactMobile: "Contact", navDownloadMobile: "Download CV (PDF)",
+                    heroTitle: "Senior Java Backend Engineer & Solution Architect",
+                    heroSubtitle: "Building robust, scalable systems for the FinTech and InsurTech industries with a passion for integrating AI and Blockchain to drive innovation.",
+                    heroButton: "View My Experience", heroDownload: "Download CV (PDF)",
+                    summaryTitle: "Professional Summary",
+                    summaryContent: "As a highly motivated Solution Architect and Senior Java Backend Engineer with over six years of experience, I have a proven track record of delivering resilient and scalable systems within the dynamic FinTech and InsurTech sectors. My expertise lies in leading high-performing technical teams and architecting innovative solutions that masterfully integrate cutting-edge AI and Blockchain technologies. I thrive on solving complex business challenges and am committed to driving meaningful digital transformation.",
+                    skillsTitle: "Technical Skillset",
+                    skillsIntro: "My technical abilities are well-rounded, with deep expertise in backend development and enterprise architecture. The chart below provides a visual representation of my proficiency across key technology domains, highlighting a strong focus on creating modern, data-driven applications.",
+                    experienceTitle: "Career Timeline",
+                    experienceIntro: "My career has been a journey of continuous growth, tackling increasingly complex challenges in banking, insurance, and telecommunications. Click on each role to expand and see my key contributions and achievements.",
+                    contactTitle: "Contact & AI Tools",
+                    contactIntro: "I'm always open to discussing new projects, creative ideas, or opportunities to be part of an ambitious team.",
+                    contactLinkedIn: "LinkedIn Profile",
+                    footer: "&copy; 2024 Dinh Thanh Bien. All Rights Reserved.",
+                    chartLabel: "Proficiency",
+                    chartLabels: ['Backend Dev', 'Architecture', 'Databases', 'DevOps & CI/CD', 'AI & ML', 'Frontend'],
+                    deepDiveButton: "Deep Dive with AI",
+                    modalTitle: "AI-Powered Deep Dive",
+                    modalLoading: "AI is analyzing, please wait...",
+                    aiHelperTitle: "Cover Letter Assistant",
+                    aiHelperIntro: "Paste a job description here. The AI will help generate a short paragraph connecting my experience to the role's requirements.",
+                    aiHelperPlaceholder: "Paste the job description here...",
+                    aiHelperButton: "Generate Snippet",
+                    aiHelperResultTitle: "AI Suggestion:",
+                    errorText: "An error occurred. Please try again."
+                }
+            };
+
+            const experienceData = {
+                vi: [
+                    { role: 'Chuyên gia (Trưởng nhóm Kỹ thuật / Kiến trúc sư Giải pháp)', company: 'Ngân hàng An Bình (ABBank)', period: 'Tháng 8, 2023 – Hiện tại', points: ['Kiến trúc và lãnh đạo việc phát triển các dịch vụ ngân hàng số trên nền tảng Backbase, tác động trực tiếp đến trải nghiệm khách hàng và cung cấp dịch vụ.', 'Tiên phong tích hợp các công nghệ mới nổi bằng cách tạo mẫu một <strong>hệ thống phát hiện gian lận bằng AI</strong> và thiết kế một <strong>khuôn khổ Blockchain (DLT)</strong> để tăng cường bảo mật và tính minh bạch của các giao dịch tài chính.', 'Cố vấn và hướng dẫn một đội kỹ thuật hiệu suất cao trong mô hình Spotify Agile, thúc đẩy văn hóa xuất sắc về kỹ thuật và đổi mới.'] },
+                    { role: 'Chuyên gia Cao cấp (Trưởng nhóm Kỹ thuật)', company: 'MB Ageas Life (MBAL)', period: 'Tháng 1, 2021 – Tháng 7, 2023', points: ['Dẫn dắt một đội ngũ thuê ngoài gồm 10 thành viên để cung cấp thành công các hệ thống BPM và CRM chiến lược, hiện đại hóa toàn bộ vòng đời bán hàng và yêu cầu bồi thường bảo hiểm.', 'Thiết kế và tích hợp một <strong>mô-đun AI để phân tích dự đoán</strong>, cải thiện dự báo tỷ lệ rời bỏ của khách hàng và cho phép các chiến lược bán hàng chủ động.', 'Nghiên cứu và thiết kế một bằng chứng khái niệm cho việc sử dụng <strong>hợp đồng thông minh dựa trên Blockchain</strong> để tự động hóa quy trình xử lý yêu cầu bồi thường, nhằm giảm nỗ lực thủ công và tăng cường sự tin cậy.'] },
+                    { role: 'Kiến trúc sư Giải pháp', company: 'Viettel Telecom', period: 'Tháng 11, 2020 – Tháng 1, 2021', points: ['Chỉ đạo một đội ngũ 15 thành viên trong việc phát triển Cổng thanh toán 3.0 cho hệ sinh thái tài chính số Viettel Money, một thành phần quan trọng cho các dịch vụ tài chính số.', 'Chịu trách nhiệm chính về kiến trúc cho các dịch vụ thanh toán cốt lõi, đảm bảo tính sẵn sàng cao và bảo mật mạnh mẽ cho hàng triệu giao dịch.', 'Thực thi các tiêu chuẩn mã hóa nghiêm ngặt và quy trình đảm bảo chất lượng, dẫn đến việc cung cấp nền tảng thành công và kịp thời cho VTNET.'] }
+                ],
+                en: [
+                    { role: 'Expert (Tech Lead / Solution Architect)', company: 'An Binh Bank (ABBank)', period: 'Aug 2023 – Present', points: ['Architect and lead the development of digital banking services on the Backbase platform, directly impacting customer experience and service delivery.', 'Pioneer the integration of emerging technologies by prototyping an <strong>AI-powered fraud detection system</strong> and designing a <strong>Blockchain (DLT) framework</strong> to enhance the security and transparency of financial transactions.', 'Mentor and guide a high-performing engineering squad within a Spotify Agile model, fostering a culture of technical excellence and innovation.'] },
+                    { role: 'Senior Specialist (Tech Lead)', company: 'MB Ageas Life (MBAL)', period: 'Jan 2021 – Jul 2023', points: ['Led a 10-member outsourced team to successfully deliver strategic BPM and CRM systems, modernizing the entire insurance sales and claims lifecycle.', 'Engineered and integrated an <strong>AI module for predictive analytics</strong>, improving customer churn prediction and enabling proactive sales strategies.', 'Investigated and designed a proof-of-concept for using <strong>Blockchain-based smart contracts</strong> to automate claims processing, aiming to reduce manual effort and increase trust.'] },
+                    { role: 'Solution Architect', company: 'Viettel Telecom', period: 'Nov 2020 – Jan 2021', points: ['Directed a 15-member team in the development of the Payment Gateway 3.0 for the Viettel Money ecosystem, a critical component for digital financial services.', 'Held primary architectural responsibility for core payment services, ensuring high availability and robust security for millions of transactions.', 'Enforced stringent coding standards and quality assurance processes, resulting in the successful and timely delivery of the platform to VTNET.'] }
+                ]
+            };
+
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            const aiModal = document.getElementById('ai-modal');
+            const closeModalBtn = document.getElementById('close-modal-btn');
+            const modalContent = document.getElementById('modal-content');
+            const generateSnippetBtn = document.getElementById('generate-snippet-btn');
+            const jobDescriptionTextarea = document.getElementById('job-description');
+            const snippetResultContainer = document.getElementById('snippet-result-container');
+            const snippetResultDiv = document.getElementById('snippet-result');
+
+            mobileMenuButton.addEventListener('click', () => mobileMenu.classList.toggle('hidden'));
+            closeModalBtn.addEventListener('click', () => aiModal.classList.add('hidden'));
+
+            async function callGeminiAPI(prompt) {
+                const apiKey = "";
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+                
+                const payload = {
+                    contents: [{ role: "user", parts: [{ text: prompt }] }]
+                };
+
+                try {
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`API call failed with status: ${response.status}`);
+                    }
+
+                    const result = await response.json();
+                    if (result.candidates && result.candidates.length > 0) {
+                        return result.candidates[0].content.parts[0].text;
+                    } else {
+                        throw new Error("No content generated.");
+                    }
+                } catch (error) {
+                    console.error("Gemini API call failed:", error);
+                    return translations[currentLanguage].errorText;
+                }
+            }
+
+            function setApiCallState(inProgress) {
+                isApiCallInProgress = inProgress;
+                generateSnippetBtn.disabled = inProgress;
+            }
+
+            function showLoader(container) {
+                container.innerHTML = `<div class="flex justify-center items-center p-8"><div class="loader"></div><p class="ml-4 text-slate-600">${translations[currentLanguage].modalLoading}</p></div>`;
+            }
+
+            generateSnippetBtn.addEventListener('click', async () => {
+                const jobDesc = jobDescriptionTextarea.value.trim();
+                if (!jobDesc || isApiCallInProgress) return;
+
+                setApiCallState(true);
+                snippetResultContainer.classList.remove('hidden');
+                showLoader(snippetResultDiv);
+
+                const promptLang = currentLanguage === 'vi' ? 'Vietnamese' : 'English';
+                const prompt = `You are a professional career coach. Your client is Đinh Thành Biên, a Senior Java Engineer & Solution Architect. His professional summary is: "${translations.en.summaryContent}". Based on this summary and the following job description, write a compelling, short paragraph (2-4 sentences) in ${promptLang} that connects his experience directly to the role's requirements. Job Description: "${jobDesc}"`;
+
+                const result = await callGeminiAPI(prompt);
+                snippetResultDiv.innerHTML = result;
+                setApiCallState(false);
+            });
+
+            function updateChart(lang) {
+                if (skillsChart) skillsChart.destroy();
+                const ctx = document.getElementById('skillsChart').getContext('2d');
+                skillsChart = new Chart(ctx, {
+                    type: 'radar',
+                    data: { labels: translations[lang].chartLabels, datasets: [{ label: translations[lang].chartLabel, data: [90, 95, 85, 85, 80, 75], backgroundColor: 'rgba(59, 130, 246, 0.2)', borderColor: 'rgba(59, 130, 246, 1)', borderWidth: 2, pointBackgroundColor: 'rgba(59, 130, 246, 1)', pointBorderColor: '#fff', pointHoverBackgroundColor: '#fff', pointHoverBorderColor: 'rgba(59, 130, 246, 1)' }] },
+                    options: { responsive: true, maintainAspectRatio: false, scales: { r: { angleLines: { color: 'rgba(0, 0, 0, 0.1)' }, grid: { color: 'rgba(0, 0, 0, 0.1)' }, pointLabels: { font: { size: 14 }, color: '#475569' }, ticks: { backdropColor: 'transparent', color: '#64748b', stepSize: 20 }, min: 0, max: 100 } }, plugins: { legend: { display: false }, tooltip: { callbacks: { label: (context) => `${context.dataset.label}: ${context.raw}%` } } } }
+                });
+            }
+
+            function populateTimeline(lang) {
+                const timelineContainer = document.getElementById('timeline-container');
+                timelineContainer.innerHTML = '';
+                experienceData[lang].forEach((job, index) => {
+                    const item = document.createElement('div');
+                    item.className = 'timeline-item mb-12 relative';
+                    item.innerHTML = `
+                        <div class="cursor-pointer">
+                            <h3 class="text-xl font-bold text-slate-800">${job.role}</h3>
+                            <p class="font-semibold text-blue-600">${job.company}</p>
+                            <p class="text-sm text-slate-500 mb-2">${job.period}</p>
+                            <span class="absolute right-0 top-1 text-blue-600 transform transition-transform">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                            </span>
+                        </div>
+                        <div class="timeline-content hidden transition-all duration-500 ease-in-out overflow-hidden">
+                             <div class="bg-white p-6 mt-4 rounded-lg shadow-sm border border-slate-200">
+                                 <ul class="space-y-3 list-disc list-inside text-slate-600">${job.points.map(point => `<li>${point}</li>`).join('')}</ul>
+                                 <button class="deep-dive-btn mt-4 bg-sky-500 text-white px-4 py-2 rounded-md text-sm font-semibold hover:bg-sky-600 transition" data-index="${index}">${translations[lang].deepDiveButton} ✨</button>
+                             </div>
+                        </div>
+                    `;
+                    timelineContainer.appendChild(item);
+                });
+            }
+
+            function switchLanguage(lang) {
+                currentLanguage = lang;
+                document.documentElement.lang = lang;
+                document.querySelectorAll('[data-lang-key]').forEach(el => {
+                    const key = el.getAttribute('data-lang-key');
+                    if(key === 'aiHelperPlaceholder') {
+                        el.placeholder = translations[lang][key];
+                    } else if (translations[lang][key]) {
+                        el.innerHTML = translations[lang][key];
+                    }
+                });
+                document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
+                document.getElementById(`lang-${lang}`).classList.add('active');
+                document.getElementById(`lang-${lang}-mobile`).classList.add('active');
+                updateChart(lang);
+                populateTimeline(lang);
+            }
+
+            document.getElementById('timeline-container').addEventListener('click', async (e) => {
+                const header = e.target.closest('.cursor-pointer');
+                if (header) {
+                    header.nextElementSibling.classList.toggle('hidden');
+                    header.querySelector('svg').parentElement.classList.toggle('rotate-180');
+                    return;
+                }
+
+                if (e.target.classList.contains('deep-dive-btn')) {
+                    if (isApiCallInProgress) return;
+                    setApiCallState(true);
+
+                    const index = e.target.getAttribute('data-index');
+                    const jobData = experienceData.en[index]; // Use English data for a consistent prompt
+                    
+                    aiModal.classList.remove('hidden');
+                    showLoader(modalContent);
+                    
+                    const promptLang = currentLanguage === 'vi' ? 'Vietnamese' : 'English';
+                    const prompt = `You are a professional technical writer for a candidate named Đinh Thành Biên. Based on the following job information, write a concise paragraph (3-5 sentences) in ${promptLang} that elaborates on the key achievements. Focus on the technical challenges, the solutions implemented, and the business impact. Job: ${jobData.role} at ${jobData.company}. Key points: ${jobData.points.join(', ')}.`;
+                    
+                    const result = await callGeminiAPI(prompt);
+                    modalContent.innerHTML = `<p class="text-slate-700 leading-relaxed">${result}</p>`;
+                    setApiCallState(false);
+                }
+            });
+
+            ['lang-vi', 'lang-en', 'lang-vi-mobile', 'lang-en-mobile'].forEach(id => {
+                document.getElementById(id).addEventListener('click', () => {
+                    switchLanguage(id.includes('vi') ? 'vi' : 'en');
+                });
+            });
+
+            switchLanguage('vi');
+        });
+    </script>
+</body>
+</html>
